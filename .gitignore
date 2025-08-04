@@ -1,0 +1,8 @@
+# Fichiers temporaires et inutiles à la racine
+*.log
+.DS_Store
+.env
+
+node_modules/
+dist/
+build/
