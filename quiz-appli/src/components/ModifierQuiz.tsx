@@ -17,42 +17,77 @@ export default function ModifierQuiz() {
 
   const [quiz, setQuiz] = useState<IQuiz | null>(null);
   const [message, setMessage] = useState('');
-  const [unauthorized, setUnauthorized] = useState(false);
-  const [erreurs, setErreurs] = useState<any>({});
+  const [erreurAuth, setErreurAuth] = useState(false);
+  const [erreurTitre, setErreurTitre] = useState('');
+  const [erreursQuestions, setErreursQuestions] = useState<
+    { enonce: string; options: string[]; niveau: string }[]
+  >([]);
 
   useEffect(() => {
-    if (!id) return;
 
     api.get(`/quizzs/${id}`)
       .then((res) => {
         const q = res.data.quiz;
         if (q.createur?.nomUtilisateur !== nomUtilisateur) {
-          setUnauthorized(true);
+          setErreurAuth(true);
           return;
         }
         setQuiz(q);
+        setErreursQuestions(
+          q.questions.map(() => ({
+            enonce: '',
+            options: ['', '', '', ''],
+            niveau: '',
+          }))
+        );
       })
       .catch(() => setMessage('Erreur lors du chargement du quiz'));
   }, [id]);
 
   const validerQuiz = () => {
-    const err: any = {};
-    if (!quiz?.titre.trim()) err.titre = 'Le titre est requis.';
-    quiz?.questions.forEach((q, idx) => {
-      if (!q.enonce.trim()) err[`enonce-${idx}`] = 'L’énoncé est requis.';
+    if (!quiz) return false;
+    let valide = true;
+
+    setErreurTitre('');
+    const nouvellesErreurs = [...erreursQuestions];
+
+    if (!quiz.titre.trim()) {
+      setErreurTitre('Le titre est requis.');
+      valide = false;
+    }
+
+    quiz.questions.forEach((q, idx) => {
+      nouvellesErreurs[idx].enonce = '';
+      nouvellesErreurs[idx].niveau = '';
+      nouvellesErreurs[idx].options = ['', '', '', ''];
+
+      if (!q.enonce.trim()) {
+        nouvellesErreurs[idx].enonce = 'L’énoncé est requis.';
+        valide = false;
+      }
+
       q.options.forEach((opt, i) => {
-        if (!opt.trim()) err[`option-${idx}-${i}`] = `L’option ${i + 1} est requise.`;
+        if (!opt.trim()) {
+          nouvellesErreurs[idx].options[i] = `L’option ${i + 1} est requise.`;
+          valide = false;
+        }
       });
-      if (!q.niveau) err[`niveau-${idx}`] = 'Le niveau est requis.';
+
+      if (!q.niveau) {
+        nouvellesErreurs[idx].niveau = 'Le niveau est requis.';
+        valide = false;
+      }
     });
-    return err;
+
+    setErreursQuestions(nouvellesErreurs);
+    return valide;
   };
 
   const handleChangeQuestion = (index: number, field: keyof IQuestion, value: any) => {
     if (!quiz) return;
-    const updatedQuestions = [...quiz.questions];
-    updatedQuestions[index] = { ...updatedQuestions[index], [field]: value };
-    setQuiz({ ...quiz, questions: updatedQuestions });
+    const questionsModifie = [...quiz.questions];
+    questionsModifie[index] = { ...questionsModifie[index], [field]: value };
+    setQuiz({ ...quiz, questions: questionsModifie });
   };
 
   const handleChangeTitre = (val: string) => {
@@ -62,9 +97,8 @@ export default function ModifierQuiz() {
 
   const handleSave = async () => {
     if (!quiz) return;
-    const validationErrors = validerQuiz();
-    setErreurs(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
+    const estValide = validerQuiz();
+    if (!estValide) return;
 
     try {
       await api.put('/quizzs/update', { quiz });
@@ -75,7 +109,7 @@ export default function ModifierQuiz() {
     }
   };
 
-  if (unauthorized) {
+  if (erreurAuth) {
     return (
       <Box p={4}>
         <Typography color="error" variant="h6" textAlign="center">
@@ -83,9 +117,7 @@ export default function ModifierQuiz() {
         </Typography>
       </Box>
     );
-  }
-
-  if (!quiz) {
+  } else if (!quiz) {
     return (
       <Box p={4}>
         <Typography textAlign="center">Chargement du quiz...</Typography>
@@ -114,8 +146,8 @@ export default function ModifierQuiz() {
               fullWidth
               value={quiz.titre}
               onChange={(e) => handleChangeTitre(e.target.value)}
-              error={!!erreurs.titre}
-              helperText={erreurs.titre}
+              error={!!erreurTitre}
+              helperText={erreurTitre}
               sx={{ mt: 2 }}
             />
 
@@ -128,8 +160,8 @@ export default function ModifierQuiz() {
                   fullWidth
                   value={q.enonce}
                   onChange={(e) => handleChangeQuestion(idx, 'enonce', e.target.value)}
-                  error={!!erreurs[`enonce-${idx}`]}
-                  helperText={erreurs[`enonce-${idx}`]}
+                  error={!!erreursQuestions[idx]?.enonce}
+                  helperText={erreursQuestions[idx]?.enonce}
                   sx={{ mt: 2 }}
                 />
 
@@ -144,13 +176,13 @@ export default function ModifierQuiz() {
                       newOptions[i] = e.target.value;
                       handleChangeQuestion(idx, 'options', newOptions);
                     }}
-                    error={!!erreurs[`option-${idx}-${i}`]}
-                    helperText={erreurs[`option-${idx}-${i}`]}
+                    error={!!erreursQuestions[idx]?.options[i]}
+                    helperText={erreursQuestions[idx]?.options[i]}
                     sx={{ mt: 2 }}
                   />
                 ))}
 
-                <FormControl fullWidth error={!!erreurs[`niveau-${idx}`]} sx={{ mt: 2 }}>
+                <FormControl fullWidth error={!!erreursQuestions[idx]?.niveau} sx={{ mt: 2 }}>
                   <InputLabel>Niveau</InputLabel>
                   <Select
                     value={q.niveau}
@@ -161,8 +193,8 @@ export default function ModifierQuiz() {
                     <MenuItem value="moyen">Moyen</MenuItem>
                     <MenuItem value="difficile">Difficile</MenuItem>
                   </Select>
-                  {erreurs[`niveau-${idx}`] && (
-                    <FormHelperText>{erreurs[`niveau-${idx}`]}</FormHelperText>
+                  {erreursQuestions[idx]?.niveau && (
+                    <FormHelperText>{erreursQuestions[idx].niveau}</FormHelperText>
                   )}
                 </FormControl>
               </Box>

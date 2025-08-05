@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Container, Card, CardContent, TextField, Typography, Button
+  Container, Card, CardContent, TextField, Typography, Button, Box
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../api/api';
@@ -10,26 +10,47 @@ export default function CreerCompte() {
   const [motDePasse, setMotDePasse] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [message, setMessage] = useState('');
-  const [erreurs, setErreurs] = useState<{ nom?: string, mot?: string, confirmation?: string }>({});
+
+  const [erreurNom, setErreurNom] = useState('');
+  const [erreurMot, setErreurMot] = useState('');
+  const [erreurConfirmation, setErreurConfirmation] = useState('');
+
   const navigate = useNavigate();
   const api = useApi();
 
+  const validerNom = (nom: string) => {
+    if (!nom.trim()) {
+      return 'Le nom est requis.';
+    } else if (nom.trim().length < 3) {
+      return 'Au moins 3 caractères.';
+    }
+    return '';
+  };
+
+  const validerMotDePasse = (mdp: string) => {
+    const regex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+    if (!mdp.trim()) {
+      return 'Le mot de passe est requis.';
+    } else if (!regex.test(mdp)) {
+      return '8 caractères minimum avec lettre et chiffre.';
+    }
+    return '';
+    
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage('');
 
-    const nouveauxErreurs: { nom?: string, mot?: string, confirmation?: string } = {};
-    if (!nomUtilisateur.trim()) {
-      nouveauxErreurs.nom = 'Le nom d’utilisateur est requis';
-    }
-    if (!motDePasse) {
-      nouveauxErreurs.mot = 'Le mot de passe est requis';
-    }
-    if (motDePasse !== confirmation) {
-      nouveauxErreurs.confirmation = 'Les mots de passe ne correspondent pas';
-    }
+    const errNom = validerNom(nomUtilisateur);
+    const errMot = validerMotDePasse(motDePasse);
+    const errConf = motDePasse !== confirmation ? 'Les mots de passe ne correspondent pas.' : '';
 
-    setErreurs(nouveauxErreurs);
-    if (Object.keys(nouveauxErreurs).length > 0) return;
+    setErreurNom(errNom);
+    setErreurMot(errMot);
+    setErreurConfirmation(errConf);
+
+    if (errNom || errMot || errConf) return;
 
     try {
       await api.post('/users/add', {
@@ -45,55 +66,66 @@ export default function CreerCompte() {
   };
 
   return (
-    <Container maxWidth="xs" sx={{ mt: 8 }}>
-      <Card>
-        <CardContent>
-          <Typography variant="h5" textAlign="center" gutterBottom>
-            Créer un compte
-          </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              label="Nom d’utilisateur"
-              fullWidth
-              value={nomUtilisateur}
-              onChange={(e) => setNomUtilisateur(e.target.value)}
-              error={!!erreurs.nom}
-              helperText={erreurs.nom}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              label="Mot de passe"
-              type="password"
-              fullWidth
-              value={motDePasse}
-              onChange={(e) => setMotDePasse(e.target.value)}
-              error={!!erreurs.mot}
-              helperText={erreurs.mot}
-              sx={{ mt: 2 }}
-            />
-            <TextField
-              label="Confirmer le mot de passe"
-              type="password"
-              fullWidth
-              value={confirmation}
-              onChange={(e) => setConfirmation(e.target.value)}
-              error={!!erreurs.confirmation}
-              helperText={erreurs.confirmation}
-              sx={{ mt: 2 }}
-            />
+    <Box sx={{
+      position: 'fixed',
+      inset: 0,
+      background: 'linear-gradient(to right, #e0f7fa, #fff)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'auto',
+      padding: 2,
+    }}>
+      <Container maxWidth="xs">
+        <Card>
+          <CardContent>
+            <Typography variant="h4" textAlign="center" gutterBottom>
+              Créer un compte
+            </Typography>
+            <form onSubmit={handleSubmit}>
+              <TextField
+                label="Nom d’utilisateur"
+                fullWidth
+                value={nomUtilisateur}
+                onChange={(e) => setNomUtilisateur(e.target.value)}
+                error={!!erreurNom}
+                helperText={erreurNom}
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                label="Mot de passe"
+                type="password"
+                fullWidth
+                value={motDePasse}
+                onChange={(e) => setMotDePasse(e.target.value)}
+                error={!!erreurMot}
+                helperText={erreurMot}
+                sx={{ mt: 2 }}
+              />
+              <TextField
+                label="Confirmer le mot de passe"
+                type="password"
+                fullWidth
+                value={confirmation}
+                onChange={(e) => setConfirmation(e.target.value)}
+                error={!!erreurConfirmation}
+                helperText={erreurConfirmation}
+                sx={{ mt: 2 }}
+              />
 
-            {message && (
-              <Typography color="error" sx={{ mt: 2 }}>
-                {message}
-              </Typography>
-            )}
+              {message && (
+                <Typography color="error" sx={{ mt: 2 }}>
+                  {message}
+                </Typography>
+              )}
 
-            <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }}>
-              Créer le compte
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </Container>
+              <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }}>
+                Créer le compte
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 }

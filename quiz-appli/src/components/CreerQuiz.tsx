@@ -16,14 +16,19 @@ export default function AjouterQuiz() {
 
   const [titre, setTitre] = useState('');
   const [categorie, setCategorie] = useState('');
-  const [questions, setQuestions] = useState<IQuestion[]>([]);
-  const [indexQuestion, setIndexQuestion] = useState(1);
   const [enonce, setEnonce] = useState('');
   const [options, setOptions] = useState(['', '', '', '']);
   const [bonneReponseIndex, setBonneReponseIndex] = useState(0);
   const [niveau, setNiveau] = useState('');
+  const [questions, setQuestions] = useState<IQuestion[]>([]);
+  const [indexQuestion, setIndexQuestion] = useState(1);
   const [message, setMessage] = useState('');
-  const [erreurs, setErreurs] = useState<any>({});
+
+  const [erreurTitre, setErreurTitre] = useState('');
+  const [erreurCategorie, setErreurCategorie] = useState('');
+  const [erreurEnonce, setErreurEnonce] = useState('');
+  const [erreursOptions, setErreursOptions] = useState<string[]>(['', '', '', '']);
+  const [erreurNiveau, setErreurNiveau] = useState('');
 
   useEffect(() => {
     if (!token) navigate('/connexion');
@@ -34,26 +39,45 @@ export default function AjouterQuiz() {
     setOptions(['', '', '', '']);
     setBonneReponseIndex(0);
     setNiveau('');
-    setErreurs({});
+    setErreurEnonce('');
+    setErreursOptions(['', '', '', '']);
+    setErreurNiveau('');
   };
 
   const validerChamps = () => {
-    const errs: any = {};
-    if (!titre.trim()) errs.titre = 'Le titre est requis.';
-    if (!categorie) errs.categorie = 'La catégorie est requise.';
-    if (!enonce.trim()) errs.enonce = 'L’énoncé est requis.';
-    options.forEach((opt, i) => {
-      if (!opt.trim()) errs[`option${i}`] = `L’option ${i + 1} est requise.`;
-    });
-    if (!niveau) errs.niveau = 'Le niveau est requis.';
-    return errs;
+    let valide = true;
+
+    setErreurTitre('');
+    setErreurCategorie('');
+    setErreurEnonce('');
+    setErreurNiveau('');
+    setErreursOptions(['', '', '', '']);
+const erreurOption = options.map(opt =>
+      !opt.trim() ? 'Cette option est requise.' : ''
+    );
+    if (!titre.trim()) {
+      setErreurTitre('Le titre est requis.');
+      valide = false;
+    } else if (!categorie) {
+      setErreurCategorie('La catégorie est requise.');
+      valide = false;
+    }else if (!enonce.trim()) {
+      setErreurEnonce("L'énoncé est requis.");
+      valide = false;
+    }else if (erreurOption.some(msg => msg)) {
+      setErreursOptions(erreurOption);
+      valide = false;
+    }else if (!niveau) {
+      setErreurNiveau('Le niveau est requis.');
+      valide = false;
+    }
+
+    return valide;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const champsInvalide = validerChamps();
-    setErreurs(champsInvalide);
-    if (Object.keys(champsInvalide).length > 0) return;
+    if (!validerChamps()) return;
 
     const question: IQuestion = {
       enonce,
@@ -62,15 +86,15 @@ export default function AjouterQuiz() {
       niveau: niveau as 'facile' | 'moyen' | 'difficile',
     };
 
-    const updatedQuestions = [...questions, question];
-    setQuestions(updatedQuestions);
+    const questionsModifie = [...questions, question];
+    setQuestions(questionsModifie);
     resetChampQuestion();
 
     if (indexQuestion === 10) {
       const quiz: IQuiz = {
         titre,
         categorie,
-        questions: updatedQuestions,
+        questions: questionsModifie,
         createurNom: nomUtilisateur || '',
       };
 
@@ -109,12 +133,12 @@ export default function AjouterQuiz() {
                 fullWidth
                 value={titre}
                 onChange={(e) => setTitre(e.target.value)}
-                error={!!erreurs.titre}
-                helperText={erreurs.titre}
+                error={!!erreurTitre}
+                helperText={erreurTitre}
                 sx={{ mt: 2 }}
               />
 
-              <FormControl fullWidth error={!!erreurs.categorie} sx={{ mt: 2 }}>
+              <FormControl fullWidth error={!!erreurCategorie} sx={{ mt: 2 }}>
                 <InputLabel id="categorie-label">Catégorie</InputLabel>
                 <Select
                   labelId="categorie-label"
@@ -126,7 +150,7 @@ export default function AjouterQuiz() {
                     <MenuItem key={cat} value={cat}>{cat}</MenuItem>
                   ))}
                 </Select>
-                {erreurs.categorie && <FormHelperText>{erreurs.categorie}</FormHelperText>}
+                {erreurCategorie && <FormHelperText>{erreurCategorie}</FormHelperText>}
               </FormControl>
 
               <Typography variant="h6" sx={{ mt: 4 }}>Question {indexQuestion} / 10</Typography>
@@ -136,8 +160,8 @@ export default function AjouterQuiz() {
                 fullWidth
                 value={enonce}
                 onChange={(e) => setEnonce(e.target.value)}
-                error={!!erreurs.enonce}
-                helperText={erreurs.enonce}
+                error={!!erreurEnonce}
+                helperText={erreurEnonce}
                 sx={{ mt: 2 }}
               />
 
@@ -152,8 +176,8 @@ export default function AjouterQuiz() {
                     newOptions[index] = e.target.value;
                     setOptions(newOptions);
                   }}
-                  error={!!erreurs[`option${index}`]}
-                  helperText={erreurs[`option${index}`]}
+                  error={!!erreursOptions[index]}
+                  helperText={erreursOptions[index]}
                   sx={{ mt: 2 }}
                 />
               ))}
@@ -174,7 +198,7 @@ export default function AjouterQuiz() {
                 </Select>
               </FormControl>
 
-              <FormControl fullWidth error={!!erreurs.niveau} sx={{ mt: 2 }}>
+              <FormControl fullWidth error={!!erreurNiveau} sx={{ mt: 2 }}>
                 <InputLabel id="niveau-label">Niveau</InputLabel>
                 <Select
                   labelId="niveau-label"
@@ -186,7 +210,7 @@ export default function AjouterQuiz() {
                   <MenuItem value="moyen">Moyen</MenuItem>
                   <MenuItem value="difficile">Difficile</MenuItem>
                 </Select>
-                {erreurs.niveau && <FormHelperText>{erreurs.niveau}</FormHelperText>}
+                {erreurNiveau && <FormHelperText>{erreurNiveau}</FormHelperText>}
               </FormControl>
 
               <Button type="submit" variant="contained" fullWidth sx={{ mt: 4 }}>
