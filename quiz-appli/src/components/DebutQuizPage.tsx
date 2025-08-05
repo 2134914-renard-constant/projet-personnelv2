@@ -10,7 +10,7 @@ interface Props {
   validerNomUtilisateur: (nom: string) => string; 
 }
 
-export default function DebutQuizPage({
+export default function DebutQuiz({
   nomUtilisateur,
   erreurNom,
   setNomUtilisateur,

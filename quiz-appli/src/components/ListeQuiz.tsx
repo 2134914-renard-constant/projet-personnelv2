@@ -62,12 +62,12 @@ export default function ListeQuiz() {
             </Select>
           </FormControl>
 
-          <Grid container spacing={3} mt={2} justifyContent="center">
+          <Grid container columns={12} spacing={3} mt={2} justifyContent="center">
             {quizzs.map((quiz) => {
               const estCreateur = quiz.createur?.nomUtilisateur === nomUtilisateur;
 
               return (
-                <Grid item xs={12} sm={6} md={3} key={quiz._id}>
+                <Grid key={quiz._id} xs={12} sm={6} md={3}>
                   <Card sx={{ borderRadius: 3, boxShadow: 4, height: '100%', position: 'relative' }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>

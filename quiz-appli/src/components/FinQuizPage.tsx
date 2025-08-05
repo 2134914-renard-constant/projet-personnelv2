@@ -6,7 +6,7 @@ interface Props {
   questions: any[];   
 }
 
-export default function EndScreen({ score, questions }: Props) {
+export default function FinQuiz({ score, questions }: Props) {
   return (
     <Box
       sx={{
