@@ -9,11 +9,15 @@ import { useApi } from '../api/api';
 import type { IQuiz } from '../models/iQuiz';
 import type { IQuestion } from '../models/iQuestion';
 
-export default function AjouterQuiz() {
+/**
+ * Composant de formulaire permettant à un utilisateur connecté de créer un quiz avec 10 questions, chacune avec 4 options et une bonne réponse
+ */
+export default function CreerQuiz() {
   const { token, utilisateurId } = useAuth();
   const navigate = useNavigate();
   const api = useApi();
 
+  // États pour les champs du quiz
   const [titre, setTitre] = useState('');
   const [categorie, setCategorie] = useState('');
   const [enonce, setEnonce] = useState('');
@@ -24,16 +28,21 @@ export default function AjouterQuiz() {
   const [indexQuestion, setIndexQuestion] = useState(1);
   const [message, setMessage] = useState('');
 
+  // États pour la validation
   const [erreurTitre, setErreurTitre] = useState('');
   const [erreurCategorie, setErreurCategorie] = useState('');
   const [erreurEnonce, setErreurEnonce] = useState('');
   const [erreursOptions, setErreursOptions] = useState<string[]>(['', '', '', '']);
   const [erreurNiveau, setErreurNiveau] = useState('');
 
+  // Redirige si l'utilisateur n'est pas connecté
   useEffect(() => {
     if (!token) navigate('/connexion');
   }, [token]);
 
+  /**
+   * Réinitialise les champs de la question après son ajout
+   */
   const resetChampQuestion = () => {
     setEnonce('');
     setOptions(['', '', '', '']);
@@ -44,6 +53,12 @@ export default function AjouterQuiz() {
     setErreurNiveau('');
   };
 
+  /**
+   * Valide les champs du formulaire de question
+   * Vérifie que chaque champ est rempli et conforme
+   *
+   * @returns {boolean} true si les champs sont valides sinon flase
+   */
   const validerChamps = () => {
     let valide = true;
 
@@ -52,7 +67,7 @@ export default function AjouterQuiz() {
     setErreurEnonce('');
     setErreurNiveau('');
     setErreursOptions(['', '', '', '']);
-const erreurOption = options.map(opt =>
+    const erreurOption = options.map(opt =>
       !opt.trim() ? 'Cette option est requise.' : ''
     );
     if (!titre.trim()) {
@@ -61,13 +76,13 @@ const erreurOption = options.map(opt =>
     } else if (!categorie) {
       setErreurCategorie('La catégorie est requise.');
       valide = false;
-    }else if (!enonce.trim()) {
+    } else if (!enonce.trim()) {
       setErreurEnonce("L'énoncé est requis.");
       valide = false;
-    }else if (erreurOption.some(msg => msg)) {
+    } else if (erreurOption.some(msg => msg)) {
       setErreursOptions(erreurOption);
       valide = false;
-    }else if (!niveau) {
+    } else if (!niveau) {
       setErreurNiveau('Le niveau est requis.');
       valide = false;
     }
@@ -75,6 +90,10 @@ const erreurOption = options.map(opt =>
     return valide;
   };
 
+  /**
+   * Gère la soumission du formulaire de question/quiz
+   * Si c’est la 10e question envoie du quiz complet à l’API
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validerChamps()) return;
@@ -122,13 +141,13 @@ const erreurOption = options.map(opt =>
       overflow: 'auto',
       padding: 2,
       mt: 7,
-      
+
     }}>
       <Container maxWidth="sm">
         <Card sx={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
           <CardContent sx={{ flexGrow: 1, overflowY: 'auto', paddingRight: 2, paddingBottom: 2 }}>
             <Typography variant="h5" gutterBottom>Créer un quiz</Typography>
-
+            {/* Formulaire de création de quiz */}
             <form onSubmit={handleSubmit}>
               <TextField
                 label="Titre du quiz"
@@ -139,7 +158,7 @@ const erreurOption = options.map(opt =>
                 helperText={erreurTitre}
                 sx={{ mt: 2 }}
               />
-
+              {/* Sélection Catégorie */}
               <FormControl fullWidth error={!!erreurCategorie} sx={{ mt: 2 }}>
                 <InputLabel id="categorie-label">Catégorie</InputLabel>
                 <Select
@@ -154,9 +173,9 @@ const erreurOption = options.map(opt =>
                 </Select>
                 {erreurCategorie && <FormHelperText>{erreurCategorie}</FormHelperText>}
               </FormControl>
-
+              {/* Affichage numéro de la question */}
               <Typography variant="h6" sx={{ mt: 4 }}>Question {indexQuestion} / 10</Typography>
-
+              {/* Champ Enoncé */}
               <TextField
                 label="Énoncé"
                 fullWidth
@@ -166,7 +185,7 @@ const erreurOption = options.map(opt =>
                 helperText={erreurEnonce}
                 sx={{ mt: 2 }}
               />
-
+              {/* Champs des options */}
               {options.map((opt, index) => (
                 <TextField
                   key={index}
@@ -184,6 +203,7 @@ const erreurOption = options.map(opt =>
                 />
               ))}
 
+              {/* Sélection de la bonne réponse */}
               <FormControl fullWidth sx={{ mt: 2 }}>
                 <InputLabel id="bonne-reponse-label">Bonne réponse</InputLabel>
                 <Select

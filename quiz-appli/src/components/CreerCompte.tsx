@@ -5,6 +5,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../api/api';
 
+/**
+ * Composant permettant à un utilisateur de créer un compte
+ */
 export default function CreerCompte() {
   const [nomUtilisateur, setNomUtilisateur] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
@@ -18,6 +21,13 @@ export default function CreerCompte() {
   const navigate = useNavigate();
   const api = useApi();
 
+  /**
+   * Valide le champ du nom d'utilisateur
+   * Vérifie que le champ n’est pas vide et contient au moins 3 caractères
+   *
+   * @param {string} nom - Le nom à valider
+   * @returns {string} Message d’erreur s’il y a une erreur sinon une chaîne vide.
+   */
   const validerNom = (nom: string) => {
     if (!nom.trim()) {
       return 'Le nom est requis.';
@@ -27,6 +37,13 @@ export default function CreerCompte() {
     return '';
   };
 
+  /**
+   * Valide le mot de passe
+   * Doit contenir au moins une lettre, un chiffre et 8 caractères.
+   *
+   * @param {string} mdp - Le mot de passe à valider
+   * @returns {string} Message d’erreur s’il y a une erreur sinon une chaîne vide
+   */
   const validerMotDePasse = (mdp: string) => {
     const regex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
     if (!mdp.trim()) {
@@ -38,6 +55,10 @@ export default function CreerCompte() {
 
   };
 
+  /**
+   * Gère la soumission du formulaire
+   * Vérifie la validité des champs et l’unicité du nom d’utilisateur puis crée le compte si tout est valide
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
@@ -52,12 +73,14 @@ export default function CreerCompte() {
 
     if (errNom || errMot || errConf) return;
 
+    // Vérifie que le nom d'utilisateur est unique
     const res = await api.post('/users/verifier-nom', { nom: nomUtilisateur });
     if (!res.data.unique) {
       setErreurNom("Ce nom d'utilisateur est déjà utilisé.");
       return;
     }
 
+    // Envoie la demande de création à l'API
     try {
       await api.post('/users/add', {
         utilisateur: {
@@ -88,6 +111,7 @@ export default function CreerCompte() {
             <Typography variant="h4" textAlign="center" gutterBottom>
               Créer un compte
             </Typography>
+            {/* Formulaire de création */}
             <form onSubmit={handleSubmit}>
               <TextField
                 label="Nom d’utilisateur"

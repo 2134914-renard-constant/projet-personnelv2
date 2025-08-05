@@ -53,9 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUtilisateurId(null);
   };
 
-  // Affiche dans la console le nom d’utilisateur connecté (utile pour le debug)
-  console.log('nomUtilisateur connecté:', nomUtilisateur);
-
   // Fournit les valeurs du contexte aux composants enfants
   return (
     <AuthContext.Provider value={{ token, nomUtilisateur, utilisateurId, setToken, deconnexion }}>
@@ -68,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    // Si on tente d’utiliser ce hook en dehors du Provider, on lance une erreur claire
+    // Si on tente d’utiliser ce hook en dehors du Provider, lancer une erreur 
     throw new Error('useAuth doit être utilisé dans <AuthProvider>');
   }
   return context;

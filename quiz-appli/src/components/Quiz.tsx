@@ -7,10 +7,16 @@ import DebutQuizPage from '../components/DebutQuizPage';
 import FinQuizPage from '../components/FinQuizPage';
 import QuestionCard from '../components/QuestionCard';
 
+/**
+ * Composant principal de déroulement d’un quiz
+ * Gère le chargement, le timer, la progression des questions, le calcul du score et l’enregistrement du résultat
+ */
 export default function Quiz() {
+  // ID du quiz à charger depuis l'URL
   const { id } = useParams();
-  const api = useApi(); 
 
+  const api = useApi(); 
+  // États principaux du déroulement du quiz
   const [questions, setQuestions] = useState<IQuestion[]>([]);
   const [index, setIndex] = useState(0);
   const [choix, setChoix] = useState<number | null>(null);
@@ -19,9 +25,11 @@ export default function Quiz() {
   const [termine, setTermine] = useState(false);
   const [titre, setTitre] = useState('');
   const [tempsRestant, setTempsRestant] = useState(15);
+  // États liés à l'identité du joueur
   const [nomUtilisateur, setNomUtilisateur] = useState('');
   const [debut, setDebut] = useState(false);
   const [erreurNom, setErreurNom] = useState('');
+  // Ref pour éviter que la fonction suivant soit appelée deux fois si timer = 0
   const timeoutRef = useRef(false);
 
   // Charger les questions du quiz avec useApi
@@ -73,6 +81,10 @@ export default function Quiz() {
     }
   }, [termine]);
 
+  /**
+   * Passe à la question suivante ou termine le quiz
+   * Incrémente le score si la bonne réponse est choisie
+   */
   const suivant = () => {
     if (choix === questions[index]?.bonneReponseIndex) setScore((prev) => prev + 1);
     if (index === questions.length - 1) setTermine(true);
@@ -82,6 +94,12 @@ export default function Quiz() {
     }
   };
 
+  /**
+   * Valide le nom d’utilisateur saisi avant de commencer le quiz
+   *
+   * @param nom Le nom entré par l'utilisateur
+   * @returns {string} Un message d’erreur ou une chaîne vide si valide
+   */
   const validerNomUtilisateur = (nom: string): string => {
     const nettoyé = nom.trim();
     if (nettoyé.length < 2 || nettoyé.length > 30) return "Le nom doit contenir entre 2 et 30 caractères.";
@@ -91,6 +109,7 @@ export default function Quiz() {
 
   // Affichage selon l’état du quiz
   if (loading) {
+    // Affiche un spinner pendant le chargement
     return <CircularProgress sx={{ m: 5 }} />;
   } else if (questions.length === 0) {
     return <Typography sx={{ mt: 4 }}>Aucune question trouvée.</Typography>;

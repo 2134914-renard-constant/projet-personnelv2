@@ -7,10 +7,18 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../contexts/AuthContext';
 
+/**
+ * Composant de barre de navigation en haut de l'écran.
+ * Affiche des liens vers les pages principales du site et gère l'état de connexion
+ * Affiche un bouton de connexion ou de déconnexion selon l'authentification
+ */
 export default function NavBar() {
   const { token, deconnexion } = useAuth();
   const navigate = useNavigate();
 
+  /**
+   * Déconnecte l'utilisateur et redirige vers la page d’accueil
+   */
   const handleDeconnexion = () => {
     deconnexion();
     navigate('/');
@@ -18,6 +26,7 @@ export default function NavBar() {
 
   return (
     <>
+      {/* Réinitialise les styles par défaut du navigateur */}
       <CssBaseline />
 
       {/* Barre de navigation en haut */}
@@ -33,16 +42,16 @@ export default function NavBar() {
           {/* Icône de connexion ou deconnexion si l'utilisateur est connecté à droite */}
           <Box>
             {!token ? (
-            <Tooltip title="Connexion">
-              <IconButton color="inherit" component={Link} to="/connexion">
-                <AccountCircleIcon />
-              </IconButton>
-            </Tooltip>
-              ) : (<Tooltip title="Déconnexion">
-                <IconButton color="inherit" onClick={handleDeconnexion}>
-                  <LogoutIcon />
+              <Tooltip title="Connexion">
+                <IconButton color="inherit" component={Link} to="/connexion">
+                  <AccountCircleIcon />
                 </IconButton>
               </Tooltip>
+            ) : (<Tooltip title="Déconnexion">
+              <IconButton color="inherit" onClick={handleDeconnexion}>
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
             )}
           </Box>
         </Toolbar>

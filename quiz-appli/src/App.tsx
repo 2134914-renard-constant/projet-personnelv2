@@ -14,14 +14,18 @@ import CreerCompte from './components/CreerCompte';
 import CreerQuiz from './components/CreerQuiz';
 import ModifierQuiz from './components/ModifierQuiz';
 
+/**
+ * Composant principal de l'application
+ * Configure le thème global, les routes avec React Router et affiche la barre de navigation
+ */
 const theme = createTheme({
   palette: {
-    mode: 'light', // ou 'dark'
+    mode: 'light',
     primary: {
-      main: '#1976d2', // couleur principale
+      main: '#1976d2', 
     },
     secondary: {
-      main: '#f50057', // couleur secondaire
+      main: '#f50057', 
     },
   },
   typography: {
@@ -34,7 +38,9 @@ const theme = createTheme({
 export default function App() {
   return (
     <ThemeProvider theme={theme}>
+      {/* Réinitialise les styles CSS par défaut */}
       <CssBaseline />
+      {/* Configuration des routes */}
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<NavBar />}>

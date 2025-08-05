@@ -1,15 +1,21 @@
 import { Box, Button, Card, CardContent, TextField, Typography } from '@mui/material';
 
-// Interface des props attendues
+// Interface des propriétés attendues par le composant
 interface Props {
-  nomUtilisateur: string;                     
-  erreurNom: string;                          
-  setNomUtilisateur: (val: string) => void;   
-  setErreurNom: (val: string) => void;        
-  setDebut: (val: boolean) => void;           
-  validerNomUtilisateur: (nom: string) => string; 
+  nomUtilisateur: string;
+  erreurNom: string;
+  setNomUtilisateur: (val: string) => void;
+  setErreurNom: (val: string) => void;
+  setDebut: (val: boolean) => void;
+  validerNomUtilisateur: (nom: string) => string;
 }
 
+/**
+ * Composant d’introduction au quiz
+ * Affiche un formulaire demandant le nom de l'utilisateur et permet de lancer le quiz si le champ est valide
+ *
+ * @param {Props} props - Les propriétés nécessaires au fonctionnement du formulaire.
+ */
 export default function DebutQuiz({
   nomUtilisateur,
   erreurNom,
@@ -29,6 +35,7 @@ export default function DebutQuiz({
         alignItems: 'center',
       }}
     >
+      {/* Carte contenant le formulaire */}
       <Card sx={{ maxWidth: 400, width: '100%', p: 4, borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
           <Typography variant="h4" textAlign="center" fontWeight={600} gutterBottom>
@@ -54,12 +61,12 @@ export default function DebutQuiz({
           {/* Bouton pour démarrer le quiz */}
           <Button
             onClick={() => {
-              const err = validerNomUtilisateur(nomUtilisateur); 
+              const err = validerNomUtilisateur(nomUtilisateur);
               if (err) {
                 setErreurNom(err);
               } else {
                 setErreurNom('');
-                setDebut(true); 
+                setDebut(true);
               }
             }}
             variant="contained"

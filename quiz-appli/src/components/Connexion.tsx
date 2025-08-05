@@ -6,6 +6,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../api/api';
 
+/**
+ * Composant de page de connexion
+ * Permet à un utilisateur de saisir ses identifiants et d’obtenir un jeton d’authentification via l’API
+ */
 export default function Connexion() {
   const [nom, setNom] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
@@ -16,8 +20,14 @@ export default function Connexion() {
   const { setToken } = useAuth();
   const api = useApi();
 
+  /**
+   * Valide le nom d'utilisateur et vérifie qu'il est présent et contient au moins 3 caractères
+   *
+   * @param {string} nom - Le nom d’utilisateur à valider
+   * @returns {string} Message d’erreur s’il y a une erreur sinon une chaîne vide.
+   */
   const validerNom = (nom: string) => {
-    if (!nom.trim()){
+    if (!nom.trim()) {
       return 'Le nom est requis.';
     }
     else if (nom.trim().length < 3) {
@@ -26,6 +36,12 @@ export default function Connexion() {
     return '';
   };
 
+  /**
+   * Valide le mot de passe et vérifie qu’il contient au moins une lettre, un chiffre, et 8 caractères minimum.
+   *
+   * @param {string} mdp - Le mot de passe à valider
+   * @returns {string} Message d’erreur s’il y a une erreur sinon une chaîne vide
+   */
   const validerMotDePasse = (mdp: string) => {
     const regex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
     if (!mdp.trim()) {
@@ -36,7 +52,11 @@ export default function Connexion() {
     return '';
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  /**
+   * Gère la soumission du formulaire de connexion
+   * Valide les champs et envoie les identifiants à l’API puis récupère le token et redirige vers la page des quiz en cas de succès
+   */
+  const handleConnexion = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const errNom = validerNom(nom);
@@ -57,6 +77,7 @@ export default function Connexion() {
 
       const token = res.data.token;
       if (token) {
+        // Sauvegarde du token dans le contexte
         setToken(token);
         navigate('/quizzs');
       } else {
@@ -85,7 +106,7 @@ export default function Connexion() {
               Connexion
             </Typography>
 
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleConnexion}>
               <TextField
                 label="Nom d’utilisateur"
                 fullWidth

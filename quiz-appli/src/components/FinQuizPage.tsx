@@ -1,11 +1,17 @@
 import { Box, Button, Card, CardContent, Typography } from '@mui/material';
 
-// Interface des props attendues
+// Interface des props attendues par le composant
 interface Props {
   score: number;      
   questions: any[];   
 }
 
+/**
+ * Composant affiché à la fin du quiz
+ * Affiche un message de fin, le score obtenu et un bouton pour revenir à la liste des quiz
+ *
+ * @param {Props} props - Le score final et la liste des questions
+ */
 export default function FinQuiz({ score, questions }: Props) {
   return (
     <Box
@@ -19,9 +25,9 @@ export default function FinQuiz({ score, questions }: Props) {
         p: 2,
       }}
     >
+      {/* Carte contenant le message de fin */}
       <Card sx={{ maxWidth: 400, width: '100%', p: 4, borderRadius: 4, boxShadow: 6, textAlign: 'center' }}>
         <CardContent>
-          {/* Message de fin */}
           <Typography variant="h4" fontWeight={600} gutterBottom>
             Quiz terminé !
           </Typography>

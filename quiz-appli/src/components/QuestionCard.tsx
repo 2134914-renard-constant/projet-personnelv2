@@ -1,16 +1,21 @@
 import { Box, Button, Card, CardContent, Chip, LinearProgress, Typography } from '@mui/material';
 
-// Définition des props attendues par le composant QuestionCard
+// Définition des props attendues par le composant 
 interface Props {
-  titre: string;                  
-  index: number;                  
-  questions: any[];               
-  choix: number | null;           
-  setChoix: (val: number) => void; 
-  suivant: () => void;            
-  tempsRestant: number;          
+  titre: string;
+  index: number;
+  questions: any[];
+  choix: number | null;
+  setChoix: (val: number) => void;
+  suivant: () => void;
+  tempsRestant: number;
 }
 
+/**
+ * Composant qui affiche une question du quiz avec ses choix, une barre de temps et un bouton pour avancer à la prochaine question.
+ *
+ * @param {Props} props - Données nécessaires pour afficher la question actuelle.
+ */
 export default function QuestionCard({
   titre,
   index,
@@ -24,12 +29,17 @@ export default function QuestionCard({
   const question = questions[index];
   const niveau = question.niveau;
 
-  // Définir la couleur selon le niveau
+  /**
+   * Retourne une couleur selon le niveau de difficulté
+   *
+   * @param niveau Le niveau ("facile", "moyen", "difficile")
+   * @returns Une couleur
+   */
   const getCouleurNiveau = (niveau: string) => {
     switch (niveau) {
-      case 'facile': return 'success';    
-      case 'moyen': return 'warning';    
-      case 'difficile': return 'error';  
+      case 'facile': return 'success';
+      case 'moyen': return 'warning';
+      case 'difficile': return 'error';
       default: return 'default';
     }
   };
@@ -70,7 +80,7 @@ export default function QuestionCard({
             </Typography>
             <Chip
               label={niveau.charAt(0).toUpperCase() + niveau.slice(1)} // Capitalise la première lettre
-              color={getCouleurNiveau(niveau)} 
+              color={getCouleurNiveau(niveau)}
               size="small"
               sx={{ fontWeight: 500 }}
             />

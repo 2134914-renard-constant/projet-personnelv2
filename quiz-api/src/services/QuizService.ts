@@ -2,7 +2,6 @@ import QuizRepo from '@src/repos/QuizRepo';
 import { IQuiz } from '@src/models/Quiz';
 import { RouteError } from '@src/common/util/route-errors';
 import HttpStatusCodes from '@src/common/constants/HttpStatusCodes';
-import mongoose from 'mongoose';
 // **** Constantes **** //
 
 export const QUIZ_NON_TROUVÉ = 'Quiz non trouvé';
@@ -33,9 +32,6 @@ async function addOne(quiz: IQuiz): Promise<IQuiz> {
 async function updateOne(quiz: IQuiz, utilisateurId: string): Promise<IQuiz> {
   const quizExistant = await QuizRepo.getOne(quiz._id!);
   if (!quizExistant) throw new RouteError(HttpStatusCodes.NOT_FOUND, 'Quiz introuvable');
-  console.log(' Vérification des autorisations');
-  console.log(' quizExistant.createur =', quizExistant.createur);
-  console.log(' utilisateurId =', utilisateurId);
   // Cas où le champ a été rempli (createur est un objet avec _id)
   if (
     typeof quizExistant.createur === 'object' &&
