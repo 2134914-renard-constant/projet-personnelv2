@@ -76,7 +76,7 @@ export default function AjouterQuiz() {
 
       try {
         await api.post('/quizzs/add', { quiz });
-        setMessage('Quiz créé avec succès 🎉');
+        setMessage('Quiz créé avec succès');
         setTimeout(() => navigate('/quizzs'), 1500);
       } catch (err) {
         console.error(err);

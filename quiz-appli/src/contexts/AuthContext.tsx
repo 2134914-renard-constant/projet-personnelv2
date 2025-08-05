@@ -15,6 +15,7 @@ interface AuthContextType {
   nomUtilisateur: string | null;
   utilisateurId: string | null;
   setToken: (val: string | null) => void;
+  deconnexion: () => void;
 }
 
 // Création du contexte d’authentification 
@@ -46,12 +47,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [token]);
 
+  const deconnexion = () => {
+    setToken(null);
+    setNomUtilisateur(null);
+    setUtilisateurId(null);
+  };
+
   // Affiche dans la console le nom d’utilisateur connecté (utile pour le debug)
   console.log('nomUtilisateur connecté:', nomUtilisateur);
 
   // Fournit les valeurs du contexte aux composants enfants
   return (
-    <AuthContext.Provider value={{ token, nomUtilisateur, utilisateurId, setToken }}>
+    <AuthContext.Provider value={{ token, nomUtilisateur, utilisateurId, setToken, deconnexion }}>
       {children}
     </AuthContext.Provider>
   );
