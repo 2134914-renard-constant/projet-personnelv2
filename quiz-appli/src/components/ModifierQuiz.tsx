@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Box, Card, CardContent, TextField, Typography, Button, Container,
-  MenuItem, Select, InputLabel, FormControl
+  MenuItem, Select, InputLabel, FormControl, FormHelperText
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../api/api';
@@ -18,6 +18,7 @@ export default function ModifierQuiz() {
   const [quiz, setQuiz] = useState<IQuiz | null>(null);
   const [message, setMessage] = useState('');
   const [unauthorized, setUnauthorized] = useState(false);
+  const [erreurs, setErreurs] = useState<any>({});
 
   useEffect(() => {
     if (!id) return;
@@ -34,6 +35,19 @@ export default function ModifierQuiz() {
       .catch(() => setMessage('Erreur lors du chargement du quiz'));
   }, [id]);
 
+  const validerQuiz = () => {
+    const err: any = {};
+    if (!quiz?.titre.trim()) err.titre = 'Le titre est requis.';
+    quiz?.questions.forEach((q, idx) => {
+      if (!q.enonce.trim()) err[`enonce-${idx}`] = 'L’énoncé est requis.';
+      q.options.forEach((opt, i) => {
+        if (!opt.trim()) err[`option-${idx}-${i}`] = `L’option ${i + 1} est requise.`;
+      });
+      if (!q.niveau) err[`niveau-${idx}`] = 'Le niveau est requis.';
+    });
+    return err;
+  };
+
   const handleChangeQuestion = (index: number, field: keyof IQuestion, value: any) => {
     if (!quiz) return;
     const updatedQuestions = [...quiz.questions];
@@ -48,6 +62,9 @@ export default function ModifierQuiz() {
 
   const handleSave = async () => {
     if (!quiz) return;
+    const validationErrors = validerQuiz();
+    setErreurs(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
 
     try {
       await api.put('/quizzs/update', { quiz });
@@ -92,38 +109,61 @@ export default function ModifierQuiz() {
           <CardContent sx={{ flexGrow: 1, overflowY: 'auto', paddingRight: 2, paddingBottom: 2 }}>
             <Typography variant="h5" gutterBottom>Modifier le quiz</Typography>
 
-            <TextField label="Titre du quiz" fullWidth value={quiz.titre} onChange={(e) => handleChangeTitre(e.target.value)} sx={{ mt: 2 }} />
+            <TextField
+              label="Titre du quiz"
+              fullWidth
+              value={quiz.titre}
+              onChange={(e) => handleChangeTitre(e.target.value)}
+              error={!!erreurs.titre}
+              helperText={erreurs.titre}
+              sx={{ mt: 2 }}
+            />
 
             {quiz.questions.map((q, idx) => (
               <Box key={idx} sx={{ mt: 4 }}>
                 <Typography variant="h6">Question {idx + 1}</Typography>
 
-                <TextField label="Énoncé" fullWidth value={q.enonce} onChange={(e) => handleChangeQuestion(idx, 'enonce', e.target.value)} sx={{ mt: 2 }} />
+                <TextField
+                  label="Énoncé"
+                  fullWidth
+                  value={q.enonce}
+                  onChange={(e) => handleChangeQuestion(idx, 'enonce', e.target.value)}
+                  error={!!erreurs[`enonce-${idx}`]}
+                  helperText={erreurs[`enonce-${idx}`]}
+                  sx={{ mt: 2 }}
+                />
 
                 {q.options.map((opt, i) => (
-                  <TextField key={i} label={`Option ${i + 1}`} fullWidth value={opt} onChange={(e) => {
-                    const newOptions = [...q.options];
-                    newOptions[i] = e.target.value;
-                    handleChangeQuestion(idx, 'options', newOptions);
-                  }} sx={{ mt: 2 }} />
+                  <TextField
+                    key={i}
+                    label={`Option ${i + 1}`}
+                    fullWidth
+                    value={opt}
+                    onChange={(e) => {
+                      const newOptions = [...q.options];
+                      newOptions[i] = e.target.value;
+                      handleChangeQuestion(idx, 'options', newOptions);
+                    }}
+                    error={!!erreurs[`option-${idx}-${i}`]}
+                    helperText={erreurs[`option-${idx}-${i}`]}
+                    sx={{ mt: 2 }}
+                  />
                 ))}
 
-                <FormControl fullWidth sx={{ mt: 2 }}>
-                  <InputLabel>Bonne réponse</InputLabel>
-                  <Select value={q.bonneReponseIndex} label="Bonne réponse" onChange={(e) => handleChangeQuestion(idx, 'bonneReponseIndex', Number(e.target.value))}>
-                    {q.options.map((opt, i) => (
-                      <MenuItem key={i} value={i}>{opt || `Option ${i + 1}`}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth sx={{ mt: 2 }}>
+                <FormControl fullWidth error={!!erreurs[`niveau-${idx}`]} sx={{ mt: 2 }}>
                   <InputLabel>Niveau</InputLabel>
-                  <Select value={q.niveau} label="Niveau" onChange={(e) => handleChangeQuestion(idx, 'niveau', e.target.value)}>
+                  <Select
+                    value={q.niveau}
+                    label="Niveau"
+                    onChange={(e) => handleChangeQuestion(idx, 'niveau', e.target.value)}
+                  >
                     <MenuItem value="facile">Facile</MenuItem>
                     <MenuItem value="moyen">Moyen</MenuItem>
                     <MenuItem value="difficile">Difficile</MenuItem>
                   </Select>
+                  {erreurs[`niveau-${idx}`] && (
+                    <FormHelperText>{erreurs[`niveau-${idx}`]}</FormHelperText>
+                  )}
                 </FormControl>
               </Box>
             ))}
@@ -132,7 +172,11 @@ export default function ModifierQuiz() {
               Enregistrer les modifications
             </Button>
 
-            {message && <Typography textAlign="center" color="primary" sx={{ mt: 2 }}>{message}</Typography>}
+            {message && (
+              <Typography textAlign="center" color="primary" sx={{ mt: 2 }}>
+                {message}
+              </Typography>
+            )}
           </CardContent>
         </Card>
       </Container>

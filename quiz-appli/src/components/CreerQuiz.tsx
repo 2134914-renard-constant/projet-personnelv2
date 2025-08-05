@@ -29,7 +29,7 @@ export default function AjouterQuiz() {
     if (!token) navigate('/connexion');
   }, [token]);
 
-  const resetQuestionFields = () => {
+  const resetChampQuestion = () => {
     setEnonce('');
     setOptions(['', '', '', '']);
     setBonneReponseIndex(0);
@@ -64,7 +64,7 @@ export default function AjouterQuiz() {
 
     const updatedQuestions = [...questions, question];
     setQuestions(updatedQuestions);
-    resetQuestionFields();
+    resetChampQuestion();
 
     if (indexQuestion === 10) {
       const quiz: IQuiz = {
