@@ -54,6 +54,14 @@ async function delete_(id: string): Promise<void> {
   await Utilisateur.findByIdAndDelete(id);
 }
 
+/**
+ * Vérifier nom de l'utilisateur unique
+ */
+async function existeNomUtilisateur(nom: string): Promise<boolean> {
+  const utilisateur = await Utilisateur.findOne({ nomUtilisateur: nom });
+  return !!utilisateur;
+}
+
 // **** Export **** //
 
 export default {
@@ -63,4 +71,5 @@ export default {
   add,
   update,
   delete: delete_,
+  existeNomUtilisateur
 } as const;

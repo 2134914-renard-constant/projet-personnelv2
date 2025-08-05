@@ -78,6 +78,7 @@ userRouter.delete(
   validateParams,
   UtilisateurRoutes.delete
 );
+userRouter.post(Paths.Utilisateurs.VerifierNom, UtilisateurRoutes.verifierNom);
 
 apiRouter.use(Paths.Utilisateurs.Base, userRouter);
 

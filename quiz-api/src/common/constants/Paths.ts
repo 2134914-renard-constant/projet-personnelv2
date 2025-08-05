@@ -12,6 +12,7 @@ export default {
     Add: '/add',
     Update: '/update',
     Delete: '/delete/:id',
+    VerifierNom: '/verifier-nom',
   },
 
   Quizzs: {

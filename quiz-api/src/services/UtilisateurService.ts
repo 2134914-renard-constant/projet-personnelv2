@@ -56,6 +56,12 @@ async function getOne(id: string): Promise<IUtilisateur> {
   }
   return utilisateur;
 }
+/**
+ * Vérifier unicité du nom de l'utilisateur
+ */
+async function verifierNomUnique(nom: string): Promise<boolean> {
+  return !(await UtilisateurRepo.existeNomUtilisateur(nom));
+}
 
 // **** Export **** //
 
@@ -65,4 +71,5 @@ export default {
   addOne,
   updateOne,
   delete: _delete,
+  verifierNomUnique
 } as const;

@@ -35,7 +35,7 @@ export default function CreerCompte() {
       return '8 caractères minimum avec lettre et chiffre.';
     }
     return '';
-    
+
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,6 +51,12 @@ export default function CreerCompte() {
     setErreurConfirmation(errConf);
 
     if (errNom || errMot || errConf) return;
+
+    const res = await api.post('/users/verifier-nom', { nom: nomUtilisateur });
+    if (!res.data.unique) {
+      setErreurNom("Ce nom d'utilisateur est déjà utilisé.");
+      return;
+    }
 
     try {
       await api.post('/users/add', {

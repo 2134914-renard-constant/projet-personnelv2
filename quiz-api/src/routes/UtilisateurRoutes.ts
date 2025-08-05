@@ -32,6 +32,11 @@ async function delete_(req: IReq<unknown, { id: string }>, res: IRes) {
   return res.status(HttpStatusCodes.OK).end();
 }
 
+async function verifierNom(req: IReq<{ nom: string }>, res: IRes) {
+  const nom = req.body.nom;
+  const estUnique = await UtilisateurService.verifierNomUnique(nom);
+  return res.json({ unique: estUnique });
+}
 
 // **** Export **** //
 
@@ -41,4 +46,5 @@ export default {
   add,
   update,
   delete: delete_,
+  verifierNom
 } as const;
