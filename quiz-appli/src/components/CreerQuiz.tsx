@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Container, Card, CardContent, TextField, Typography, Button,
-  MenuItem, Select, InputLabel, FormControl, Box
+  MenuItem, Select, InputLabel, FormControl, Box, FormHelperText
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +23,7 @@ export default function AjouterQuiz() {
   const [bonneReponseIndex, setBonneReponseIndex] = useState(0);
   const [niveau, setNiveau] = useState('');
   const [message, setMessage] = useState('');
+  const [erreurs, setErreurs] = useState<any>({});
 
   useEffect(() => {
     if (!token) navigate('/connexion');
@@ -33,10 +34,26 @@ export default function AjouterQuiz() {
     setOptions(['', '', '', '']);
     setBonneReponseIndex(0);
     setNiveau('');
+    setErreurs({});
+  };
+
+  const validerChamps = () => {
+    const errs: any = {};
+    if (!titre.trim()) errs.titre = 'Le titre est requis.';
+    if (!categorie) errs.categorie = 'La catégorie est requise.';
+    if (!enonce.trim()) errs.enonce = 'L’énoncé est requis.';
+    options.forEach((opt, i) => {
+      if (!opt.trim()) errs[`option${i}`] = `L’option ${i + 1} est requise.`;
+    });
+    if (!niveau) errs.niveau = 'Le niveau est requis.';
+    return errs;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const champsInvalide = validerChamps();
+    setErreurs(champsInvalide);
+    if (Object.keys(champsInvalide).length > 0) return;
 
     const question: IQuestion = {
       enonce,
@@ -59,7 +76,7 @@ export default function AjouterQuiz() {
 
       try {
         await api.post('/quizzs/add', { quiz });
-        setMessage('Quiz créé avec succès ');
+        setMessage('Quiz créé avec succès 🎉');
         setTimeout(() => navigate('/quizzs'), 1500);
       } catch (err) {
         console.error(err);
@@ -90,13 +107,14 @@ export default function AjouterQuiz() {
               <TextField
                 label="Titre du quiz"
                 fullWidth
-                required
                 value={titre}
                 onChange={(e) => setTitre(e.target.value)}
+                error={!!erreurs.titre}
+                helperText={erreurs.titre}
                 sx={{ mt: 2 }}
               />
 
-              <FormControl fullWidth required sx={{ mt: 2 }}>
+              <FormControl fullWidth error={!!erreurs.categorie} sx={{ mt: 2 }}>
                 <InputLabel id="categorie-label">Catégorie</InputLabel>
                 <Select
                   labelId="categorie-label"
@@ -104,13 +122,11 @@ export default function AjouterQuiz() {
                   label="Catégorie"
                   onChange={(e) => setCategorie(e.target.value)}
                 >
-                  <MenuItem value="Culture générale">Culture générale</MenuItem>
-                  <MenuItem value="Sport">Sport</MenuItem>
-                  <MenuItem value="Géographie">Géographie</MenuItem>
-                  <MenuItem value="Histoire">Histoire</MenuItem>
-                  <MenuItem value="Sciences">Sciences</MenuItem>
-                  <MenuItem value="Informatique">Informatique</MenuItem>
+                  {['Culture générale', 'Sport', 'Géographie', 'Histoire', 'Sciences', 'Informatique'].map((cat) => (
+                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                  ))}
                 </Select>
+                {erreurs.categorie && <FormHelperText>{erreurs.categorie}</FormHelperText>}
               </FormControl>
 
               <Typography variant="h6" sx={{ mt: 4 }}>Question {indexQuestion} / 10</Typography>
@@ -118,9 +134,10 @@ export default function AjouterQuiz() {
               <TextField
                 label="Énoncé"
                 fullWidth
-                required
                 value={enonce}
                 onChange={(e) => setEnonce(e.target.value)}
+                error={!!erreurs.enonce}
+                helperText={erreurs.enonce}
                 sx={{ mt: 2 }}
               />
 
@@ -128,7 +145,6 @@ export default function AjouterQuiz() {
                 <TextField
                   key={index}
                   label={`Option ${index + 1}`}
-                  required
                   fullWidth
                   value={opt}
                   onChange={(e) => {
@@ -136,11 +152,13 @@ export default function AjouterQuiz() {
                     newOptions[index] = e.target.value;
                     setOptions(newOptions);
                   }}
+                  error={!!erreurs[`option${index}`]}
+                  helperText={erreurs[`option${index}`]}
                   sx={{ mt: 2 }}
                 />
               ))}
 
-              <FormControl fullWidth required sx={{ mt: 2 }}>
+              <FormControl fullWidth sx={{ mt: 2 }}>
                 <InputLabel id="bonne-reponse-label">Bonne réponse</InputLabel>
                 <Select
                   labelId="bonne-reponse-label"
@@ -156,7 +174,7 @@ export default function AjouterQuiz() {
                 </Select>
               </FormControl>
 
-              <FormControl fullWidth required sx={{ mt: 2 }}>
+              <FormControl fullWidth error={!!erreurs.niveau} sx={{ mt: 2 }}>
                 <InputLabel id="niveau-label">Niveau</InputLabel>
                 <Select
                   labelId="niveau-label"
@@ -168,14 +186,10 @@ export default function AjouterQuiz() {
                   <MenuItem value="moyen">Moyen</MenuItem>
                   <MenuItem value="difficile">Difficile</MenuItem>
                 </Select>
+                {erreurs.niveau && <FormHelperText>{erreurs.niveau}</FormHelperText>}
               </FormControl>
 
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                sx={{ mt: 4 }}
-              >
+              <Button type="submit" variant="contained" fullWidth sx={{ mt: 4 }}>
                 {indexQuestion === 10 ? 'Terminer et créer le quiz' : 'Question suivante'}
               </Button>
             </form>
