@@ -25,9 +25,7 @@ export default function AjouterQuiz() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/connexion');
-    }
+    if (!token) navigate('/connexion');
   }, [token]);
 
   const resetQuestionFields = () => {
@@ -37,7 +35,9 @@ export default function AjouterQuiz() {
     setNiveau('');
   };
 
-  const ajouterQuestion = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const question: IQuestion = {
       enonce,
       options,
@@ -61,7 +61,7 @@ export default function AjouterQuiz() {
         await api.post('/quizzs/add', { quiz });
         setMessage('Quiz créé avec succès ');
         setTimeout(() => navigate('/quizzs'), 1500);
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
         setMessage('Erreur lors de la création du quiz.');
       }
@@ -86,55 +86,105 @@ export default function AjouterQuiz() {
           <CardContent sx={{ flexGrow: 1, overflowY: 'auto', paddingRight: 2, paddingBottom: 2 }}>
             <Typography variant="h5" gutterBottom>Créer un quiz</Typography>
 
-            <TextField label="Titre du quiz" fullWidth value={titre} onChange={(e) => setTitre(e.target.value)} sx={{ mt: 2 }} />
+            <form onSubmit={handleSubmit}>
+              <TextField
+                label="Titre du quiz"
+                fullWidth
+                required
+                value={titre}
+                onChange={(e) => setTitre(e.target.value)}
+                sx={{ mt: 2 }}
+              />
 
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel id="categorie-label">Catégorie</InputLabel>
-              <Select labelId="categorie-label" value={categorie} label="Catégorie" onChange={(e) => setCategorie(e.target.value)}>
-                <MenuItem value="Culture générale">Culture générale</MenuItem>
-                <MenuItem value="Sport">Sport</MenuItem>
-                <MenuItem value="Géographie">Géographie</MenuItem>
-                <MenuItem value="Histoire">Histoire</MenuItem>
-                <MenuItem value="Sciences">Sciences</MenuItem>
-                <MenuItem value="Informatique">Informatique</MenuItem>
-              </Select>
-            </FormControl>
+              <FormControl fullWidth required sx={{ mt: 2 }}>
+                <InputLabel id="categorie-label">Catégorie</InputLabel>
+                <Select
+                  labelId="categorie-label"
+                  value={categorie}
+                  label="Catégorie"
+                  onChange={(e) => setCategorie(e.target.value)}
+                >
+                  <MenuItem value="Culture générale">Culture générale</MenuItem>
+                  <MenuItem value="Sport">Sport</MenuItem>
+                  <MenuItem value="Géographie">Géographie</MenuItem>
+                  <MenuItem value="Histoire">Histoire</MenuItem>
+                  <MenuItem value="Sciences">Sciences</MenuItem>
+                  <MenuItem value="Informatique">Informatique</MenuItem>
+                </Select>
+              </FormControl>
 
-            <Typography variant="h6" sx={{ mt: 4 }}>Question {indexQuestion} / 10</Typography>
+              <Typography variant="h6" sx={{ mt: 4 }}>Question {indexQuestion} / 10</Typography>
 
-            <TextField label="Énoncé" fullWidth value={enonce} onChange={(e) => setEnonce(e.target.value)} sx={{ mt: 2 }} />
+              <TextField
+                label="Énoncé"
+                fullWidth
+                required
+                value={enonce}
+                onChange={(e) => setEnonce(e.target.value)}
+                sx={{ mt: 2 }}
+              />
 
-            {options.map((opt, index) => (
-              <TextField key={index} label={`Option ${index + 1}`} fullWidth value={opt} onChange={(e) => {
-                const newOptions = [...options];
-                newOptions[index] = e.target.value;
-                setOptions(newOptions);
-              }} sx={{ mt: 2 }} />
-            ))}
+              {options.map((opt, index) => (
+                <TextField
+                  key={index}
+                  label={`Option ${index + 1}`}
+                  required
+                  fullWidth
+                  value={opt}
+                  onChange={(e) => {
+                    const newOptions = [...options];
+                    newOptions[index] = e.target.value;
+                    setOptions(newOptions);
+                  }}
+                  sx={{ mt: 2 }}
+                />
+              ))}
 
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel id="bonne-reponse-label">Bonne réponse</InputLabel>
-              <Select labelId="bonne-reponse-label" value={bonneReponseIndex} label="Bonne réponse" onChange={(e) => setBonneReponseIndex(Number(e.target.value))}>
-                {options.map((opt, index) => (
-                  <MenuItem key={index} value={index}>{opt || `Option ${index + 1}`}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              <FormControl fullWidth required sx={{ mt: 2 }}>
+                <InputLabel id="bonne-reponse-label">Bonne réponse</InputLabel>
+                <Select
+                  labelId="bonne-reponse-label"
+                  value={bonneReponseIndex}
+                  label="Bonne réponse"
+                  onChange={(e) => setBonneReponseIndex(Number(e.target.value))}
+                >
+                  {options.map((opt, index) => (
+                    <MenuItem key={index} value={index}>
+                      {opt || `Option ${index + 1}`}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel id="niveau-label">Niveau</InputLabel>
-              <Select labelId="niveau-label" value={niveau} label="Niveau" onChange={(e) => setNiveau(e.target.value)}>
-                <MenuItem value="facile">Facile</MenuItem>
-                <MenuItem value="moyen">Moyen</MenuItem>
-                <MenuItem value="difficile">Difficile</MenuItem>
-              </Select>
-            </FormControl>
+              <FormControl fullWidth required sx={{ mt: 2 }}>
+                <InputLabel id="niveau-label">Niveau</InputLabel>
+                <Select
+                  labelId="niveau-label"
+                  value={niveau}
+                  label="Niveau"
+                  onChange={(e) => setNiveau(e.target.value)}
+                >
+                  <MenuItem value="facile">Facile</MenuItem>
+                  <MenuItem value="moyen">Moyen</MenuItem>
+                  <MenuItem value="difficile">Difficile</MenuItem>
+                </Select>
+              </FormControl>
 
-            <Button variant="contained" fullWidth sx={{ mt: 4 }} onClick={ajouterQuestion}>
-              {indexQuestion === 10 ? 'Terminer et créer le quiz' : 'Question suivante'}
-            </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{ mt: 4 }}
+              >
+                {indexQuestion === 10 ? 'Terminer et créer le quiz' : 'Question suivante'}
+              </Button>
+            </form>
 
-            {message && <Typography textAlign="center" color="primary" sx={{ mt: 2 }}>{message}</Typography>}
+            {message && (
+              <Typography textAlign="center" color="primary" sx={{ mt: 2 }}>
+                {message}
+              </Typography>
+            )}
           </CardContent>
         </Card>
       </Container>
