@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
   Box, Card, CardContent, Typography, Button, Grid, Container,
-  Paper, FormControl, InputLabel, Select, MenuItem, IconButton
+  Paper, FormControl, InputLabel, Select, MenuItem, IconButton, Dialog,
+  DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../api/api';
 
@@ -16,11 +18,24 @@ export default function ListeQuiz() {
   const { nomUtilisateur, token } = useAuth();
   const api = useApi();
 
+  const [quizASupprimer, setQuizASupprimer] = useState<string | null>(null);
+
   useEffect(() => {
     api.get(`/quizzs/categorie/${encodeURIComponent(categorie)}`)
       .then((res) => setQuizzs(res.data.quizzs))
       .catch(console.error);
   }, [categorie]);
+
+  const supprimerQuiz = async () => {
+    if (!quizASupprimer) return;
+    try {
+      await api.delete(`/quizzs/delete/${quizASupprimer}`);
+      setQuizzs(quizzs.filter((q) => q._id !== quizASupprimer));
+      setQuizASupprimer(null);
+    } catch (err) {
+      console.error('Erreur suppression quiz:', err);
+    }
+  };
 
   return (
     <Box
@@ -37,12 +52,7 @@ export default function ListeQuiz() {
     >
       <Container maxWidth="lg">
         <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-          <Typography
-            variant="h4"
-            textAlign="center"
-            gutterBottom
-            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}
-          >
+          <Typography variant="h4" textAlign="center" gutterBottom>
             Liste des quiz
           </Typography>
 
@@ -55,26 +65,22 @@ export default function ListeQuiz() {
               onChange={(e) => setCategorie(e.target.value)}
             >
               {categoriesDisponibles.map((cat, idx) => (
-                <MenuItem key={idx} value={cat}>
-                  {cat}
-                </MenuItem>
+                <MenuItem key={idx} value={cat}>{cat}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <Grid container columns={12} spacing={3} mt={2} justifyContent="center">
+          <Grid container columns={12} spacing={3} justifyContent="center">
             {quizzs.map((quiz) => {
               const estCreateur = quiz.createur?.nomUtilisateur === nomUtilisateur;
 
               return (
-                <Grid key={quiz._id} xs={12} sm={6} md={3}>
-                  <Card sx={{ borderRadius: 3, boxShadow: 4, height: '100%', position: 'relative' }}>
+                <Grid key={quiz._id} size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Card sx={{ borderRadius: 3, boxShadow: 4, height: '100%' }}>
                     <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                        {quiz.titre}
-                      </Typography>
+                      <Typography variant="h6" gutterBottom>{quiz.titre}</Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        Catégorie : {quiz.categorie}
+                        Créé par : {quiz.createur?.nomUtilisateur || 'Inconnu'}
                       </Typography>
 
                       <Button
@@ -87,14 +93,22 @@ export default function ListeQuiz() {
                       </Button>
 
                       {token && estCreateur && (
-                        <IconButton
-                          component={Link}
-                          to={`/modifier-quiz/${quiz._id}`}
-                          color="primary"
-                          sx={{ mt: 1 }}
-                        >
-                          <EditIcon />
-                        </IconButton>
+                        <Box display="flex" gap={1} justifyContent="center" mt={1}>
+                          <IconButton
+                            component={Link}
+                            to={`/modifier-quiz/${quiz._id}`}
+                            color="primary"
+                          >
+                            <EditIcon />
+                          </IconButton>
+
+                          <IconButton
+                            color="error"
+                            onClick={() => setQuizASupprimer(quiz._id)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
                       )}
                     </CardContent>
                   </Card>
@@ -103,6 +117,18 @@ export default function ListeQuiz() {
             })}
           </Grid>
         </Paper>
+
+        {/* Dialogue de confirmation suppression */}
+        <Dialog open={!!quizASupprimer} onClose={() => setQuizASupprimer(null)}>
+          <DialogTitle>Confirmation</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Voulez-vous vraiment supprimer ce quiz ? Cette action est irréversible.</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setQuizASupprimer(null)}>Annuler</Button>
+            <Button onClick={supprimerQuiz} color="error">Supprimer</Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Box>
   );
