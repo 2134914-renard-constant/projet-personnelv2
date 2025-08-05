@@ -27,6 +27,8 @@ async function addOne(quiz: IQuiz): Promise<IQuiz> {
 
 /**
  * Mise à jour d’un quiz.
+ * inspirée de chatgpt
+ * Auteur : Constant Renard
  */
 async function updateOne(quiz: IQuiz, utilisateurId: string): Promise<IQuiz> {
   const quizExistant = await QuizRepo.getOne(quiz._id!);
@@ -34,7 +36,7 @@ async function updateOne(quiz: IQuiz, utilisateurId: string): Promise<IQuiz> {
   console.log(' Vérification des autorisations');
   console.log(' quizExistant.createur =', quizExistant.createur);
   console.log(' utilisateurId =', utilisateurId);
-  // Cas où le champ a été populé (createur est un objet avec _id)
+  // Cas où le champ a été rempli (createur est un objet avec _id)
   if (
     typeof quizExistant.createur === 'object' &&
     quizExistant.createur !== null &&

@@ -5,6 +5,6 @@ export interface IQuiz {
   titre: string;
   categorie: string;
   questions: IQuestion[];
-  createurNom: string;
+  createur: string;
   dateCreation?: Date;
 }

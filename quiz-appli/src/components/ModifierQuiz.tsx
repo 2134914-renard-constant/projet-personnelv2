@@ -132,9 +132,10 @@ export default function ModifierQuiz() {
       background: 'linear-gradient(to right, #e0f7fa, #fff)',
       display: 'flex',
       justifyContent: 'center',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       overflow: 'auto',
       padding: 2,
+      mt: 7,
     }}>
       <Container maxWidth="sm">
         <Card sx={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>

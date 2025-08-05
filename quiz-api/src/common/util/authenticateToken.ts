@@ -4,10 +4,11 @@ import HttpStatusCodes from '@src/common/constants/HttpStatusCodes';
 
 /**
  * Intergiciel pour authentifier le jeton de l'utilisateur
+ * inspirée du cours de dev web 3 
+ * auteur : Constant Renard
  */
 function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
-  console.log(' Authorization Header:', authHeader);
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {

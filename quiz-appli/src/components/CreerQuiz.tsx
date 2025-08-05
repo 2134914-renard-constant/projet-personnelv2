@@ -10,7 +10,7 @@ import type { IQuiz } from '../models/iQuiz';
 import type { IQuestion } from '../models/iQuestion';
 
 export default function AjouterQuiz() {
-  const { token, nomUtilisateur } = useAuth();
+  const { token, utilisateurId } = useAuth();
   const navigate = useNavigate();
   const api = useApi();
 
@@ -95,7 +95,7 @@ const erreurOption = options.map(opt =>
         titre,
         categorie,
         questions: questionsModifie,
-        createurNom: nomUtilisateur || '',
+        createur: utilisateurId || '',
       };
 
       try {
@@ -118,9 +118,11 @@ const erreurOption = options.map(opt =>
       background: 'linear-gradient(to right, #e0f7fa, #fff)',
       display: 'flex',
       justifyContent: 'center',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       overflow: 'auto',
       padding: 2,
+      mt: 7,
+      
     }}>
       <Container maxWidth="sm">
         <Card sx={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
