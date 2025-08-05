@@ -18,7 +18,5 @@ export function useApi() {
     },
   });
 
-  console.log('🔐 Token utilisé :', token);
-
   return apiInstance;
 }

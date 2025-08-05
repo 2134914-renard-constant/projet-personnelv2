@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useApi } from '../api/api'; // ✅ Hook personnalisé
+import { useApi } from '../api/api'; 
 import type { IQuestion } from '../models/iQuestion';
 import { CircularProgress, Typography } from '@mui/material';
 import DebutQuizPage from '../components/DebutQuizPage';
@@ -9,7 +9,7 @@ import QuestionCard from '../components/QuestionCard';
 
 export default function Quiz() {
   const { id } = useParams();
-  const api = useApi(); // ✅ Instance Axios configurée
+  const api = useApi(); 
 
   const [questions, setQuestions] = useState<IQuestion[]>([]);
   const [index, setIndex] = useState(0);
@@ -24,7 +24,7 @@ export default function Quiz() {
   const [erreurNom, setErreurNom] = useState('');
   const timeoutRef = useRef(false);
 
-  // ✅ Charger les questions du quiz avec useApi
+  // Charger les questions du quiz avec useApi
   useEffect(() => {
     if (id) {
       api.get(`/quizzs/${id}`)
@@ -38,7 +38,7 @@ export default function Quiz() {
     }
   }, [id]);
 
-  // ✅ Gérer le timer
+  // Gérer le timer
   useEffect(() => {
     if (!debut || termine) return;
     setTempsRestant(15);
@@ -60,7 +60,7 @@ export default function Quiz() {
     return () => clearInterval(timer);
   }, [index, debut, termine]);
 
-  // ✅ Enregistrer le score à la fin du quiz
+  // Enregistrer le score à la fin du quiz
   useEffect(() => {
     if (termine && id && nomUtilisateur) {
       api.post('/resultats/add', {
@@ -89,7 +89,7 @@ export default function Quiz() {
     return '';
   };
 
-  // ✅ Affichage selon l’état du quiz
+  // Affichage selon l’état du quiz
   if (loading) {
     return <CircularProgress sx={{ m: 5 }} />;
   } else if (questions.length === 0) {
