@@ -62,6 +62,13 @@ export default function Classement() {
             value={quizId}
             label="Sélectionner un quiz"
             onChange={(e) => setQuizId(e.target.value)}
+            MenuProps={{
+              sx: {
+                '& .MuiPaper-root': {
+                  maxHeight: 38 * 5.5,
+                },
+              },
+            }}
           >
             {quizzs.map((quiz) => (
               <MenuItem key={quiz._id} value={quiz._id}>
