@@ -4,7 +4,14 @@ import HttpStatusCodes from '@src/common/constants/HttpStatusCodes';
 import { IUserLogin } from '@src/models/Utilisateur';
 
 /**
- * Générer un jeton JWT pour un utilisateur à partir de son nom d'utilisateur et mot de passe
+ * Contrôleur pour la génération d’un jeton JWT lors de la connexion
+ * 
+ * @param {IReq} req - La requête contenant l'objet `userlogin` avec le nom d'utilisateur et le mot de passe
+ * @param {IRes} res - L’objet de réponse utilisé pour retourner soit un jeton ou soit une erreur HTTP
+ * @returns {Promise<IRes>} - Une réponse HTTP avec un jeton JWT (200), ou une erreur 400/401 selon le cas
+ * 
+ * Inspiré de : https://web3.profinfo.ca/express_jwt/
+ * 
  */
 async function generateToken(req: IReq, res: IRes) {
   const userlogin = req.body.userlogin as IUserLogin;

@@ -5,7 +5,14 @@ import bcrypt from 'bcrypt';
 
 export const UTILISATEUR_NOT_FOUND_ERR = 'Utilisateur non trouvé';
 
-// Fonction qui génère un token JWT si l'utilisateur est valide
+/**
+ * Génère un jeton JWT pour un utilisateur si ses identifiants sont valides.
+ * 
+ * @param {IUserLogin} utilisateur - Les identifiants saisis par l'utilisateur (nom et mot de passe).
+ * @returns {Promise<string>} Le jeton signé si l'utilisateur est authentifié sinon une chaîne vide.
+ * 
+ * Inspiré de : https://web3.profinfo.ca/express_jwt/
+ */
 async function generateToken(utilisateur: IUserLogin): Promise<string> {
   const utilisateurs = await UtilisateurService.getAll();
 

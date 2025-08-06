@@ -26,13 +26,12 @@ async function addOne(quiz: IQuiz): Promise<IQuiz> {
 
 /**
  * Mise à jour d’un quiz.
- * inspirée de chatgpt
- * Auteur : Constant Renard
  */
 async function updateOne(quiz: IQuiz, utilisateurId: string): Promise<IQuiz> {
   const quizExistant = await QuizRepo.getOne(quiz._id!);
   if (!quizExistant) throw new RouteError(HttpStatusCodes.NOT_FOUND, 'Quiz introuvable');
   // Cas où le champ a été rempli (createur est un objet avec _id)
+  // Généré par OpenAI. (2025). ChatGPT (version 04 août 2025) [Modèle massif de langage]. https://chat.openai.com/chat
   if (
     typeof quizExistant.createur === 'object' &&
     quizExistant.createur !== null &&
@@ -50,6 +49,7 @@ async function updateOne(quiz: IQuiz, utilisateurId: string): Promise<IQuiz> {
       throw new RouteError(HttpStatusCodes.FORBIDDEN, 'Accès refusé');
     }
   }
+  // Fin du code généré
 
   return QuizRepo.update(quiz);
 }
