@@ -10,7 +10,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../api/api';
 // Liste des catégories disponibles pour les quiz
-const categoriesDisponibles = ['Sport', 'Histoire', 'Géographie', 'Culture générale', 'Mathématiques'];
+const categoriesDisponibles = ['Sport', 'Histoire', 'Géographie', 'Culture générale', 'Informatique', 'Sciences'];
 
 /**
  * Composant affichant tous les quiz filtrés par catégorie
@@ -24,9 +24,10 @@ export default function ListeQuiz() {
   const api = useApi();
   // ID du quiz à supprimer
   const [quizASupprimer, setQuizASupprimer] = useState<string | null>(null);
+
   /**
-     * Récupère les quiz selon la catégorie sélectionnée à chaque changement
-     */
+   * Récupère les quiz selon la catégorie sélectionnée à chaque changement
+   */
   useEffect(() => {
     api.get(`/quizzs/categorie/${encodeURIComponent(categorie)}`)
       .then((res) => setQuizzs(res.data.quizzs))
@@ -37,15 +38,17 @@ export default function ListeQuiz() {
    * Supprime un quiz sélectionné s’il existe et met à jour l’interface
    */
   const supprimerQuiz = async () => {
-    if (!quizASupprimer) return;
-    try {
-      await api.delete(`/quizzs/delete/${quizASupprimer}`);
-      setQuizzs(quizzs.filter((q) => q._id !== quizASupprimer));
-      setQuizASupprimer(null);
-    } catch (err) {
-      console.error('Erreur suppression quiz:', err);
-    }
-  };
+    if (quizASupprimer) {
+      try {
+        await api.delete(`/quizzs/delete/${quizASupprimer}`);
+        setQuizzs(quizzs.filter((q) => q._id !== quizASupprimer));
+        setQuizASupprimer(null);
+      } catch (err) {
+        console.error('Erreur suppression quiz:', err);
+      }
+    };
+  }
+
 
   return (
     <Box
@@ -71,7 +74,7 @@ export default function ListeQuiz() {
               <Button
                 variant="outlined"
                 component={Link}
-                to="/ajouter-quiz"
+                to="/creer-quiz"
               >
                 Créer un quiz
               </Button>

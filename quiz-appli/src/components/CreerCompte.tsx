@@ -71,28 +71,30 @@ export default function CreerCompte() {
     setErreurMot(errMot);
     setErreurConfirmation(errConf);
 
-    if (errNom || errMot || errConf) return;
+    if (!errNom && !errMot && !errConf) {
+      // Vérifie que le nom d'utilisateur est unique
+      const res = await api.post('/users/verifier-nom', { nom: nomUtilisateur });
+      if (!res.data.unique) {
+        setErreurNom("Ce nom d'utilisateur est déjà utilisé.");
+        return;
+      }
 
-    // Vérifie que le nom d'utilisateur est unique
-    const res = await api.post('/users/verifier-nom', { nom: nomUtilisateur });
-    if (!res.data.unique) {
-      setErreurNom("Ce nom d'utilisateur est déjà utilisé.");
-      return;
-    }
+      // Envoie la demande de création à l'API
+      try {
+        await api.post('/users/add', {
+          utilisateur: {
+            nomUtilisateur,
+            motDePasse,
+          },
+        });
+        navigate('/connexion');
+      } catch {
+        setMessage("Erreur lors de la création du compte.");
+      }
+    };
+  }
 
-    // Envoie la demande de création à l'API
-    try {
-      await api.post('/users/add', {
-        utilisateur: {
-          nomUtilisateur,
-          motDePasse,
-        },
-      });
-      navigate('/connexion');
-    } catch {
-      setMessage("Erreur lors de la création du compte.");
-    }
-  };
+
 
   return (
     <Box sx={{
@@ -129,7 +131,7 @@ export default function CreerCompte() {
                 value={motDePasse}
                 onChange={(e) => setMotDePasse(e.target.value)}
                 error={!!erreurMot}
-                helperText={erreurMot}
+                helperText={erreurMot || "Minimum 8 caractères avec au moins une lettre et un chiffre."}
                 sx={{ mt: 2 }}
               />
               <TextField

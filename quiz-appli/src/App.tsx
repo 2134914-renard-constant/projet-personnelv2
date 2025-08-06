@@ -22,10 +22,10 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#1976d2', 
+      main: '#1976d2',
     },
     secondary: {
-      main: '#f50057', 
+      main: '#f50057',
     },
   },
   typography: {
@@ -41,20 +41,20 @@ export default function App() {
       {/* Réinitialise les styles CSS par défaut */}
       <CssBaseline />
       {/* Configuration des routes */}
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<NavBar />}>
-          <Route index element={<Accueil />} />
-          <Route path="quizzs" element={<ListeQuizzs />} />
-          <Route path="quiz/:id" element={<Quiz />} />
-          <Route path="classement" element={<Classement />} />
-          <Route path="connexion" element={<Connexion />} />
-          <Route path="creer-compte" element={<CreerCompte />} />
-          <Route path="creer-quiz" element={<CreerQuiz />} />
-          <Route path="modifier-quiz/:id" element={<ModifierQuiz />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<NavBar />}>
+            <Route index element={<Accueil />} />
+            <Route path="quizzs" element={<ListeQuizzs />} />
+            <Route path="quiz/:id" element={<Quiz />} />
+            <Route path="classement" element={<Classement />} />
+            <Route path="connexion" element={<Connexion />} />
+            <Route path="creer-compte" element={<CreerCompte />} />
+            <Route path="creer-quiz" element={<CreerQuiz />} />
+            <Route path="modifier-quiz/:id" element={<ModifierQuiz />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

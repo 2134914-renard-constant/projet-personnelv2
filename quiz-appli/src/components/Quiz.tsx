@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useApi } from '../api/api'; 
+import { useApi } from '../api/api';
 import type { IQuestion } from '../models/iQuestion';
 import { CircularProgress, Typography } from '@mui/material';
 import DebutQuizPage from '../components/DebutQuizPage';
@@ -15,7 +15,7 @@ export default function Quiz() {
   // ID du quiz à charger depuis l'URL
   const { id } = useParams();
 
-  const api = useApi(); 
+  const api = useApi();
   // États principaux du déroulement du quiz
   const [questions, setQuestions] = useState<IQuestion[]>([]);
   const [index, setIndex] = useState(0);
@@ -47,6 +47,7 @@ export default function Quiz() {
   }, [id]);
 
   // Gérer le timer
+  // inspiré de chatgpt
   useEffect(() => {
     if (!debut || termine) return;
     setTempsRestant(15);
@@ -103,7 +104,6 @@ export default function Quiz() {
   const validerNomUtilisateur = (nom: string): string => {
     const nettoyé = nom.trim();
     if (nettoyé.length < 2 || nettoyé.length > 30) return "Le nom doit contenir entre 2 et 30 caractères.";
-    if (!/^[a-zA-Z0-9À-ÿ\s_-]+$/.test(nettoyé)) return "Le nom contient des caractères non autorisés.";
     return '';
   };
 

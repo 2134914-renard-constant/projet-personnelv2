@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
   Container, Card, CardContent, TextField, Typography, Button,
-  MenuItem, Select, InputLabel, FormControl, Box, FormHelperText
+  MenuItem, Select, InputLabel, FormControl, Box, FormHelperText,
+  Tooltip
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../api/api';
@@ -43,7 +45,7 @@ export default function CreerQuiz() {
   /**
    * Réinitialise les champs de la question après son ajout
    */
-  const resetChampQuestion = () => {
+  const resetChampsQuestion = () => {
     setEnonce('');
     setOptions(['', '', '', '']);
     setBonneReponseIndex(0);
@@ -96,38 +98,41 @@ export default function CreerQuiz() {
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validerChamps()) return;
 
-    const question: IQuestion = {
-      enonce,
-      options,
-      bonneReponseIndex,
-      niveau: niveau as 'facile' | 'moyen' | 'difficile',
-    };
-
-    const questionsModifie = [...questions, question];
-    setQuestions(questionsModifie);
-    resetChampQuestion();
-
-    if (indexQuestion === 10) {
-      const quiz: IQuiz = {
-        titre,
-        categorie,
-        questions: questionsModifie,
-        createur: utilisateurId || '',
+    if (validerChamps()) {
+      const question: IQuestion = {
+        enonce,
+        options,
+        bonneReponseIndex,
+        niveau: niveau as 'facile' | 'moyen' | 'difficile',
       };
 
-      try {
-        await api.post('/quizzs/add', { quiz });
-        setMessage('Quiz créé avec succès');
-        setTimeout(() => navigate('/quizzs'), 1500);
-      } catch (err) {
-        console.error(err);
-        setMessage('Erreur lors de la création du quiz.');
+      const questionsModifie = [...questions, question];
+      setQuestions(questionsModifie);
+      resetChampsQuestion();
+
+      if (indexQuestion === 10) {
+        const quiz: IQuiz = {
+          titre,
+          categorie,
+          questions: questionsModifie,
+          createur: utilisateurId || '',
+        };
+
+        try {
+          await api.post('/quizzs/add', { quiz });
+          setMessage('Quiz créé avec succès');
+          setTimeout(() => navigate('/quizzs'), 1500);
+        } catch (err) {
+          console.error(err);
+          setMessage('Erreur lors de la création du quiz.');
+        }
+      } else {
+        setIndexQuestion(indexQuestion + 1);
       }
-    } else {
-      setIndexQuestion(indexQuestion + 1);
     }
+
+
   };
 
   return (
@@ -146,6 +151,16 @@ export default function CreerQuiz() {
       <Container maxWidth="sm">
         <Card sx={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
           <CardContent sx={{ flexGrow: 1, overflowY: 'auto', paddingRight: 2, paddingBottom: 2 }}>
+            {/* Bouton retour */}
+            <Tooltip title="Retour à la liste des quiz">
+              <Button
+                onClick={() => navigate('/quizzs')}
+                sx={{ mb: 2 }}
+                variant="outlined"
+              >
+                <ArrowBackIcon />
+              </Button>
+            </Tooltip>
             <Typography variant="h5" gutterBottom>Créer un quiz</Typography>
             {/* Formulaire de création de quiz */}
             <form onSubmit={handleSubmit}>
@@ -241,7 +256,11 @@ export default function CreerQuiz() {
             </form>
 
             {message && (
-              <Typography textAlign="center" color="primary" sx={{ mt: 2 }}>
+              <Typography
+                textAlign="center"
+                color={message.includes('succès') ? 'success.main' : 'error'}
+                sx={{ mt: 2 }}
+              >
                 {message}
               </Typography>
             )}

@@ -79,7 +79,8 @@ export default function QuestionCard({
               Question {index + 1} / {questions.length}
             </Typography>
             <Chip
-              label={niveau.charAt(0).toUpperCase() + niveau.slice(1)} // Capitalise la première lettre
+              // Capitalise la première lettre
+              label={niveau.charAt(0).toUpperCase() + niveau.slice(1)}
               color={getCouleurNiveau(niveau)}
               size="small"
               sx={{ fontWeight: 500 }}
@@ -113,9 +114,10 @@ export default function QuestionCard({
             {question.options.map((opt: string, i: number) => (
               <Button
                 key={i}
-                variant={choix === i ? 'contained' : 'outlined'} // Style différent si sélectionné
+                // Style différent si sélectionné
+                variant={choix === i ? 'contained' : 'outlined'}
                 color={choix === i ? 'primary' : 'inherit'}
-                onClick={() => setChoix(i)} // Enregistre l'option sélectionnée
+                onClick={() => setChoix(i)}
                 sx={{ borderRadius: 2, textTransform: 'none', fontSize: '0.95rem' }}
               >
                 {opt}
@@ -128,7 +130,8 @@ export default function QuestionCard({
             onClick={suivant}
             variant="contained"
             size="medium"
-            disabled={choix === null} // Désactivé tant que l'utilisateur n'a rien sélectionné
+            // Désactivé tant que l'utilisateur n'a rien sélectionné
+            disabled={choix === null}
             sx={{ mt: 3, borderRadius: 2 }}
             fullWidth
           >

@@ -65,28 +65,34 @@ export default function Connexion() {
     setErreurMotDePasse(errMdp);
     setErreurConnexion('');
 
-    if (errNom || errMdp) return;
+    if (!errNom && !errMdp) {
+      try {
+        const res = await api.post('/generatetoken', {
+          userlogin: {
+            nomUtilisateur: nom,
+            motDePasse,
+          },
+        });
 
-    try {
-      const res = await api.post('/generatetoken', {
-        userlogin: {
-          nomUtilisateur: nom,
-          motDePasse,
-        },
-      });
-
-      const token = res.data.token;
-      if (token) {
-        // Sauvegarde du token dans le contexte
-        setToken(token);
-        navigate('/quizzs');
-      } else {
-        setErreurConnexion('Identifiants invalides.');
+        const token = res.data.token;
+        if (token) {
+          // Sauvegarde du token dans le contexte
+          setToken(token);
+          navigate('/quizzs');
+        } else {
+          setErreurConnexion('Identifiants invalides.');
+        }
+      } catch (err: any) {
+        if (err.response?.status === 401) {
+          setErreurConnexion('Identifiants invalides.');
+        } else {
+          setErreurConnexion('Erreur de connexion.');
+        }
       }
-    } catch {
-      setErreurConnexion('Erreur de connexion.');
-    }
-  };
+    };
+  }
+
+
 
   return (
     <Box sx={{

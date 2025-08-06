@@ -1,9 +1,10 @@
 import { Box, Button, Card, CardContent, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 // Interface des props attendues par le composant
 interface Props {
-  score: number;      
-  questions: any[];   
+  score: number;
+  questions: any[];
 }
 
 /**
@@ -13,12 +14,13 @@ interface Props {
  * @param {Props} props - Le score final et la liste des questions
  */
 export default function FinQuiz({ score, questions }: Props) {
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
         position: 'fixed',
         inset: 0,
-        background: 'linear-gradient(to right, #e0f7fa, #fff)', 
+        background: 'linear-gradient(to right, #e0f7fa, #fff)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -41,16 +43,28 @@ export default function FinQuiz({ score, questions }: Props) {
             {score} / {questions.length}
           </Typography>
 
-          {/* Bouton pour retourner à la liste des quiz */}
+          {/* Bouton retour aux quiz */}
           <Button
             variant="contained"
             color="primary"
             size="large"
-            onClick={() => window.location.href = '/quizzs'}
-            sx={{ borderRadius: 2 }}
+            onClick={() => navigate('/quizzs')}
+            sx={{ borderRadius: 2, mb: 2 }}
             fullWidth
           >
             Retour aux quiz
+          </Button>
+
+          {/* Bouton : Voir le classement */}
+          <Button
+            variant="outlined"
+            color="primary"
+            size="large"
+            onClick={() => navigate('/classement')}
+            sx={{ borderRadius: 2 }}
+            fullWidth
+          >
+            Voir le classement
           </Button>
         </CardContent>
       </Card>

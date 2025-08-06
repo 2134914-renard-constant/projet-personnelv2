@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import {
   Box, Card, CardContent, TextField, Typography, Button, Container,
-  MenuItem, Select, InputLabel, FormControl, FormHelperText
+  MenuItem, Select, InputLabel, FormControl, FormHelperText,
+  Tooltip
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApi } from '../api/api';
 import { useAuth } from '../contexts/AuthContext';
 import type { IQuiz } from '../models/iQuiz';
@@ -26,6 +28,7 @@ export default function ModifierQuiz() {
 
   // Si l'utilisateur n'est pas le créateur
   const [erreurAuth, setErreurAuth] = useState(false);
+
   const [erreurTitre, setErreurTitre] = useState('');
   // Liste des erreurs pour chaque question
   const [erreursQuestions, setErreursQuestions] = useState<
@@ -65,42 +68,44 @@ export default function ModifierQuiz() {
    * @returns {boolean} True si tout est valide sinon false.
    */
   const validerQuiz = () => {
-    if (!quiz) return false;
-    let valide = true;
+    if (quiz) {
+      let valide = true;
 
-    setErreurTitre('');
-    const nouvellesErreurs = [...erreursQuestions];
+      setErreurTitre('');
+      const nouvellesErreurs = [...erreursQuestions];
 
-    if (!quiz.titre.trim()) {
-      setErreurTitre('Le titre est requis.');
-      valide = false;
-    }
-
-    quiz.questions.forEach((q, idx) => {
-      nouvellesErreurs[idx].enonce = '';
-      nouvellesErreurs[idx].niveau = '';
-      nouvellesErreurs[idx].options = ['', '', '', ''];
-
-      if (!q.enonce.trim()) {
-        nouvellesErreurs[idx].enonce = 'L’énoncé est requis.';
+      if (!quiz.titre.trim()) {
+        setErreurTitre('Le titre est requis.');
         valide = false;
       }
 
-      q.options.forEach((opt, i) => {
-        if (!opt.trim()) {
-          nouvellesErreurs[idx].options[i] = `L’option ${i + 1} est requise.`;
+      quiz.questions.forEach((q, idx) => {
+        nouvellesErreurs[idx].enonce = '';
+        nouvellesErreurs[idx].niveau = '';
+        nouvellesErreurs[idx].options = ['', '', '', ''];
+
+        if (!q.enonce.trim()) {
+          nouvellesErreurs[idx].enonce = 'L’énoncé est requis.';
+          valide = false;
+        }
+
+        q.options.forEach((opt, i) => {
+          if (!opt.trim()) {
+            nouvellesErreurs[idx].options[i] = `L’option ${i + 1} est requise.`;
+            valide = false;
+          }
+        });
+
+        if (!q.niveau) {
+          nouvellesErreurs[idx].niveau = 'Le niveau est requis.';
           valide = false;
         }
       });
 
-      if (!q.niveau) {
-        nouvellesErreurs[idx].niveau = 'Le niveau est requis.';
-        valide = false;
-      }
-    });
+      setErreursQuestions(nouvellesErreurs);
+      return valide;
+    }
 
-    setErreursQuestions(nouvellesErreurs);
-    return valide;
   };
 
   /**
@@ -111,10 +116,12 @@ export default function ModifierQuiz() {
    * @param valeur Nouvelle valeur
    */
   const handleChangeQuestion = (index: number, champ: keyof IQuestion, valeur: any) => {
-    if (!quiz) return;
-    const questionsModifie = [...quiz.questions];
-    questionsModifie[index] = { ...questionsModifie[index], [champ]: valeur };
-    setQuiz({ ...quiz, questions: questionsModifie });
+    if (quiz) {
+      const questionsModifie = [...quiz.questions];
+      questionsModifie[index] = { ...questionsModifie[index], [champ]: valeur };
+      setQuiz({ ...quiz, questions: questionsModifie });
+    }
+
   };
 
   /**
@@ -123,25 +130,31 @@ export default function ModifierQuiz() {
    * @param val Nouveau titre
    */
   const handleChangeTitre = (val: string) => {
-    if (!quiz) return;
-    setQuiz({ ...quiz, titre: val });
+    if (quiz) {
+      setQuiz({ ...quiz, titre: val });
+    }
+
   };
 
   /**
    * Enregistre les modifications après validation
    */
   const handleSave = async () => {
-    if (!quiz) return;
     const estValide = validerQuiz();
-    if (!estValide) return;
-
-    try {
-      await api.put('/quizzs/update', { quiz });
-      setMessage('Quiz mis à jour avec succès');
-      setTimeout(() => navigate('/quizzs'), 1500);
-    } catch {
-      setMessage('Erreur lors de la sauvegarde');
+    if (quiz && estValide) {
+      try {
+        await api.put('/quizzs/update', { quiz });
+        setMessage('Quiz mis à jour avec succès');
+        setTimeout(() => navigate('/quizzs'), 1500);
+      } catch {
+        setMessage('Erreur lors de la sauvegarde');
+      }
     }
+    else {
+      return;
+    }
+
+
   };
   // Si l'utilisateur n'est pas autorisé
   if (erreurAuth) {
@@ -177,6 +190,16 @@ export default function ModifierQuiz() {
       <Container maxWidth="sm">
         <Card sx={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
           <CardContent sx={{ flexGrow: 1, overflowY: 'auto', paddingRight: 2, paddingBottom: 2 }}>
+            {/* Bouton de retour */}
+            <Tooltip title="Retour à la liste des quiz">
+              <Button
+                onClick={() => navigate('/quizzs')}
+                variant="outlined"
+                sx={{ mb: 2, minWidth: 0, padding: 1 }}
+              >
+                <ArrowBackIcon />
+              </Button>
+            </Tooltip>
             <Typography variant="h5" gutterBottom>Modifier le quiz</Typography>
             {/* Champ Titre */}
             <TextField
@@ -210,15 +233,32 @@ export default function ModifierQuiz() {
                     fullWidth
                     value={opt}
                     onChange={(e) => {
-                      const newOptions = [...q.options];
-                      newOptions[i] = e.target.value;
-                      handleChangeQuestion(idx, 'options', newOptions);
+                      const nouvelleOption = [...q.options];
+                      nouvelleOption[i] = e.target.value;
+                      handleChangeQuestion(idx, 'options', nouvelleOption);
                     }}
                     error={!!erreursQuestions[idx]?.options[i]}
                     helperText={erreursQuestions[idx]?.options[i]}
                     sx={{ mt: 2 }}
                   />
                 ))}
+                {/* Sélection de la bonne réponse */}
+                <FormControl fullWidth sx={{ mt: 2 }}>
+                  <InputLabel>Bonne réponse</InputLabel>
+                  <Select
+                    value={q.bonneReponseIndex}
+                    label="Bonne réponse"
+                    onChange={(e) =>
+                      handleChangeQuestion(idx, 'bonneReponseIndex', Number(e.target.value))
+                    }
+                  >
+                    {q.options.map((opt, i) => (
+                      <MenuItem key={i} value={i}>
+                        {opt || `Option ${i + 1}`}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 {/* Sélection du niveau */}
                 <FormControl fullWidth error={!!erreursQuestions[idx]?.niveau} sx={{ mt: 2 }}>
                   <InputLabel>Niveau</InputLabel>
@@ -243,7 +283,11 @@ export default function ModifierQuiz() {
             </Button>
             {/* Message de retour */}
             {message && (
-              <Typography textAlign="center" color="primary" sx={{ mt: 2 }}>
+              <Typography
+                textAlign="center"
+                color={message.includes('succès') ? 'success.main' : 'error'}
+                sx={{ mt: 2 }}
+              >
                 {message}
               </Typography>
             )}
