@@ -4,8 +4,8 @@ import HttpStatusCodes from '@src/common/constants/HttpStatusCodes';
 
 /**
  * Intergiciel pour authentifier le jeton de l'utilisateur
- * inspirée du cours de dev web 3 
- * auteur : Constant Renard
+ * 
+ * Inspiré de : https://web3.profinfo.ca/express_jwt/ 
  */
 function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
